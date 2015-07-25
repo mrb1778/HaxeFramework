@@ -1,0 +1,45 @@
+package com.nachofries.framework.util;
+
+/**
+ * ...
+ * @author Michael R. Bernstein
+ */
+
+enum Position {
+    ABOVE;
+    ABOVE_LEFT;
+    ABOVE_WITH_LEFT;
+    ABOVE_CENTER;
+    ABOVE_RIGHT;
+    ABOVE_WITH_RIGHT;
+    TOP_LEFT;
+    TOP_WITH_LEFT;
+    TOP_CENTER;
+    TOP_WITH_RIGHT;
+    TOP_RIGHT;
+    TOP_CENTER_RIGHT;
+    TOP_MIDDLE_RIGHT_CENTER;
+    MIDDLE;
+    MIDDLE_LEFT;
+    MIDDLE_WITH_LEFT;
+    MIDDLE_CENTER;
+    MIDDLE_RIGHT;
+    BELOW;
+    BELOW_LEFT;
+    BELOW_WITH_LEFT;
+    BELOW_CENTER;
+    BELOW_RIGHT;
+    BOTTOM;
+    BOTTOM_WITH_LEFT;
+    BOTTOM_LEFT;
+    BOTTOM_CENTER;
+    BOTTOM_WITH_RIGHT;
+    BOTTOM_RIGHT;
+    WITH_TOP;
+    WITH_BOTTOM;
+    WITH_LEFT;
+    WITH_RIGHT;
+    LEFT;
+    CENTER;
+    RIGHT;
+}
