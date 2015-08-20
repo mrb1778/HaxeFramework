@@ -10,6 +10,11 @@ class Placement {
         alignMiddleOf(object1, object2, offsetY);
     }
 
+    public static inline function alignTopLeft(object1:Positionable, object2:Positionable, offsetX:Float = 0, offsetY:Float = 0):Void {
+        alignWithLeft(object1, object2, offsetX);
+        alignWithTop(object1, object2, offsetY);
+    }
+
     public static inline function center(object:Positionable, offsetX:Float = 0, offsetY:Float = 0):Void {
         centerHorizontal(object, offsetX);
         centerVertical(object, offsetY);
@@ -93,6 +98,13 @@ class Placement {
     public static inline function alignMiddleOf(object1:Positionable, object2:Positionable, offset:Float=0):Void {
         object2.setCenterY(object1.getCenterY() + offset);
     }
+    
+    public static inline function alignBetweenHorizontally(object1:Positionable, object2:Positionable, object3:Positionable, offset:Float=0):Void {
+        object3.setCenterX((object1.getCenterX() + object2.getCenterX())/2 + offset);
+    }
+    public static inline function alignBetweenVertically(object1:Positionable, object2:Positionable, object3:Positionable, offset:Float=0):Void {
+        object3.setCenterY((object1.getCenterY() + object2.getCenterY())/2 + offset);
+    }
 
     public static inline function setLeftOfPoint(object:Positionable, x:Float = 0, offset:Float = 0):Void {
         object.setRightX(x - offset);
@@ -173,6 +185,9 @@ class Placement {
             case ABOVE_LEFT:
                 alignAbove(object1, object2, offsetY);
                 alignLeftOf(object1, object2, offsetX);
+            case ABOVE_LEFT_CENTER:
+                alignAbove(object1, object2, offsetY);
+                object2.setLeftX(object1.getCenterX());
             case ABOVE_WITH_LEFT:
                 alignAbove(object1, object2, offsetY);
                 alignWithLeft(object1, object2, offsetX);
@@ -228,6 +243,9 @@ class Placement {
             case BELOW_WITH_LEFT:
                 alignBelow(object1, object2, offsetY);
                 alignWithLeft(object1, object2, offsetX);
+            case BELOW_WITH_RIGHT:
+                alignBelow(object1, object2, offsetY);
+                alignWithRight(object1, object2, offsetX);
             case BELOW_CENTER:
                 alignBelow(object1, object2, offsetY);
                 alignCenterOf(object1, object2, offsetX);

@@ -9,7 +9,9 @@ package com.nachofries.framework.spritesheet;
 
 import com.nachofries.framework.util.ClassInfo;
 import com.nachofries.framework.util.Pooling;
-class SpriteSheetAnimatedSprite extends SpriteSheetSprite {
+
+@final
+class SpriteSheetAnimatedSprite extends AbstractSpriteSheetSprite {
     static inline var DEFAULT_ANIMATION_RATE:Int = 15;
     static inline var ANIMATION_NAME_PRIMARY:String = "primary";
 

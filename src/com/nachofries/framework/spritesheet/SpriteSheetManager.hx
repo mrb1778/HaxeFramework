@@ -16,21 +16,26 @@ class SpriteSheetManager {
     static inline var flags:Int = Tilesheet.TILE_TRANS_2x2 | Tilesheet.TILE_RGB | Tilesheet.TILE_ALPHA;
     public static inline var DATA_LENGTH:Int = 11;
 
-    public static var IMAGE_DEFAULT:String = "spritesheet/spritesheet";
+    private static inline var IMAGE_DEFAULT:String = "spritesheet/spritesheet";
 
     static var images:Map<String, SpriteSheetEntry> = new Map<String, SpriteSheetEntry>();
     static var tileSheet:Tilesheet;
     public static var spriteSheetBitmap:BitmapData;
 
+    public static function loadSpriteSheet():Void {
+        #if debug
+        spriteSheetBitmap  = Drawing.getBitmapData(IMAGE_DEFAULT, false);
+        #else
+        spriteSheetBitmap  = new SpriteSheetImage(0, 0);
+        #end
 
-    public static function loadSpriteSheet(?name:String):Void {
-        if(name == null) {
-            name = IMAGE_DEFAULT;
-        }
-        spriteSheetBitmap  = Drawing.getBitmapData(name, false);
         tileSheet = new Tilesheet(spriteSheetBitmap);
 
-        var json:Dynamic = Resources.loadJson("images/" + name);
+        #if debug
+        var json:Dynamic = Resources.loadJson("images/" + IMAGE_DEFAULT);
+        #else
+        var json:Dynamic = CompileTime.parseJsonFile("assets/images/spritesheet/spritesheet.json");
+        #end
 
         var frames:Array<Dynamic> = json.frames;
         var imageCount:Int = 0;
@@ -67,3 +72,5 @@ class SpriteSheetManager {
         tileSheet.drawTiles(graphics, data, true, flags);
     }
 }
+
+@:bitmap("assets/images/spritesheet/spritesheet.png") class SpriteSheetImage extends flash.display.BitmapData {}

@@ -7,6 +7,9 @@ package com.nachofries.framework.sprite;
  */
 
 
+import com.nachofries.framework.spritesheet.TiledSpriteSheetSprite;
+import com.nachofries.framework.spritesheet.SpriteSheetManager;
+import com.nachofries.framework.spritesheet.AbstractSpriteSheetSprite;
 import com.nachofries.framework.behavior.RepeatFallBehavior;
 import com.nachofries.framework.util.ArrayUtils;
 import com.nachofries.framework.util.NumberUtils;
@@ -36,40 +39,48 @@ class SpriteCreator {
     public static function addFromJson(spriteAddable:SpriteAddable, json:Dynamic, objectMap:PositionableMap, levelWidth:Float, levelHeight:Float):Positionable {
         //var location:Rectangle = new Rectangle(json.x, json.y, 0, 0);
         //location.setScale(Application.SCALE);
+        switch(json.type) {
+            case "Image":
+                var sprite:AbstractSpriteSheetSprite = SpriteSheetSpriteCreator.createFromJson(json);
+                Placement.alignFromJson(sprite, json, objectMap, levelWidth, levelHeight, spriteAddable.getCreateLocation());
+                spriteAddable.addSprite(sprite, json.foreground == true);
+                placementCallback(sprite, json);
+                return sprite;
+            case "FillImage":
+                if(SpriteSheetManager.entryExists(json.background)) {
+                    var sprite:TiledSpriteSheetSprite = TiledSpriteSheetSprite.create(json.background);
+                    sprite.setWidth(json.width*Application.SCALE);
+                    sprite.setHeight(json.height*Application.SCALE);
+                    Placement.alignFromJson(sprite, json, objectMap, levelWidth, levelHeight, spriteAddable.getCreateLocation());
+                    spriteAddable.addSprite(sprite, json.foreground == true);
+                    return sprite;
+                } else {
+                    var sprite = Drawing.createFilledSprite(json.background, json.width*Application.SCALE, json.height*Application.SCALE);
+                    Placement.alignFromJson(sprite, json, objectMap, levelWidth, levelHeight, spriteAddable.getCreateLocation());
+                    spriteAddable.addSprite(sprite, json.foreground == true);
+                    return sprite;
+                }
+            case "RepeatFallImage":
+                var sprite:AbstractSpriteSheetSprite = SpriteSheetSpriteCreator.createFromJson(json);
+                var width:Float = json.width != null ? json.width * Application.SCALE : levelWidth;
+                var height:Float = json.height != null ? json.height * Application.SCALE : levelHeight;
 
-        if(json.type == "Image") {
-            var sprite:SpriteSheetSprite = SpriteSheetSpriteCreator.createFromJson(json);
-            Placement.alignFromJson(sprite, json, objectMap, levelWidth, levelHeight, spriteAddable.getCreateLocation());
-            spriteAddable.addSprite(sprite, json.foreground == true);
-            placementCallback(sprite, json);
-            return sprite;
-        } else if(json.type == "FillImage") {
-            var sprite = Drawing.createFilledSprite(json.background, json.width*Application.SCALE, json.height*Application.SCALE);
-            Placement.alignFromJson(sprite, json, objectMap, levelWidth, levelHeight, spriteAddable.getCreateLocation());
-            spriteAddable.addSprite(sprite, json.foreground == true);
-            return sprite;
-        } /*else if(json.type == "RepeatFallImage") {
-            var sprite:SpriteSheetSprite = SpriteSheetSpriteCreator.createFromJson(json);
-            var width:Float = json.width != null ? json.width * Application.SCALE : levelWidth;
-            var height:Float = json.height != null ? json.height * Application.SCALE : levelHeight;
+                Placement.alignFromJson(sprite, json, objectMap, levelWidth, levelHeight, spriteAddable.getCreateLocation());
+                sprite.setBehavior(RepeatFallBehavior.create(
+                                       json.verticalSpeed * Application.SCALE,
+                                       json.horizontalSpeed * Application.SCALE,
+                                       width, height));
+                spriteAddable.addSprite(sprite, json.foreground == true);
 
-            if(json.scale != null) {
-                sprite.setScale(json.scale * Application.SCALE);
-            }
+                return sprite;
+            case "ParticleSystem":
+                var sprite = ParticleSystemSpriteSheetSprite.createFromJson(json);
+                Placement.alignFromJson(sprite, json, objectMap, levelWidth, levelHeight, spriteAddable.getCreateLocation());
+                spriteAddable.addSprite(sprite, json.foreground == true);
+                return sprite;
 
-            sprite.setBehavior(RepeatFallBehavior.create(json.verticalSpeed, json.horizontalSpeed, 0, 0, width, height));
-            //sprite.setLeftX(location.getLeftX());
-            //sprite.setTopY(location.getTopY());
-            spriteAddable.addSprite(sprite, json.foreground == true);
-            location.setWidth(width);
-            location.setHeight(height);
-        } else if(json.type == "ParticleSystem") {
-            var sprite = ParticleSystemSpriteSheetSprite.createFromJson(json);
-            location.setWidth(sprite.getWidth());
-            location.setHeight(sprite.getHeight());
-            Placement.alignFromJson(location, json, objectMap, levelWidth, levelHeight);
-            spriteAddable.addSprite(sprite, location.getLeftX(), location.getTopY(), json.foreground == true);
-        } else if(json.type == "Message") {
+        }
+         /*else if(json.type == "Message") {
             var sprite = new LifecycleSprite();
             if(json.image != null) {
                 sprite.addChild(Drawing.loadImage(json.image));

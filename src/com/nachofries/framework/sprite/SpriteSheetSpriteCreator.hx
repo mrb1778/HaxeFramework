@@ -7,6 +7,7 @@ package com.nachofries.framework.sprite;
  */
 
 
+import com.nachofries.framework.spritesheet.AbstractSpriteSheetSprite;
 import com.nachofries.framework.util.Application;
 import com.nachofries.framework.util.ArrayUtils;
 import com.nachofries.framework.util.TemplateManager;
@@ -18,18 +19,18 @@ import com.nachofries.framework.spritesheet.SpriteSheetSprite;
 import com.nachofries.framework.spritesheet.SpriteSheetAnimatedSprite;
 
 class SpriteSheetSpriteCreator {
-    public static inline function createFromJson(json:Dynamic, ignoreLayers:Bool=false):SpriteSheetSprite {
-        var sprite:SpriteSheetSprite = null;
+    public static inline function createFromJson(json:Dynamic, ignoreLayers:Bool=false):AbstractSpriteSheetSprite {
+        var sprite:AbstractSpriteSheetSprite = null;
         if (!ignoreLayers && json.layers != null) {
             var layeredSprite:SpriteSheetLayeredSprite = SpriteSheetLayeredSprite.create();
 
-            var baseSprite:SpriteSheetSprite = createFromJson(json, true);
+            var baseSprite:AbstractSpriteSheetSprite = createFromJson(json, true);
             if(baseSprite != null) {
                 layeredSprite.setPrimarySprite(baseSprite);
             }
             var layers:Array<Dynamic> = json.layers;
             for (layer in layers) {
-                var layerSprite:SpriteSheetSprite = createFromJson(layer);
+                var layerSprite:AbstractSpriteSheetSprite = createFromJson(layer);
                 if(layeredSprite.getPrimarySprite() == null) {
                     layeredSprite.setPrimarySprite(layerSprite);
                 } else {
@@ -60,8 +61,8 @@ class SpriteSheetSpriteCreator {
         return sprite;
     }
 
-    public static inline function createArrayFromTemplateArray(templates:Array<String>):Array<SpriteSheetSprite> {
-        var sprites:Array<SpriteSheetSprite> = [];
+    public static inline function createArrayFromTemplateArray(templates:Array<String>):Array<AbstractSpriteSheetSprite> {
+        var sprites:Array<AbstractSpriteSheetSprite> = [];
         for (template in templates) {
             sprites.push(createFromJson(TemplateManager.getTemplate(template)));
         }

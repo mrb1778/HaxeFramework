@@ -1,5 +1,8 @@
 package com.nachofries.framework.util;
 #if (cpp || neko)
+import com.nachofries.framework.util.Drawing.DrawFit;
+import com.nachofries.framework.util.Drawing.DrawFit;
+import com.nachofries.framework.lifecycle.LifecycleSpritePooled;
 import sys.io.FileOutput;
 import openfl.utils.ByteArray;
 #end
@@ -62,7 +65,7 @@ class Drawing {
         return bitmap;
     }
     public static inline function loadImageSprite(name:String, cache:Bool=true):LifecycleSprite {
-        var sprite:LifecycleSprite = new LifecycleSprite();
+        var sprite:LifecycleSprite = LifecycleSpritePooled.create();
         sprite.setName(name);
         sprite.mouseEnabled = false;
         sprite.mouseChildren = false;
@@ -71,7 +74,7 @@ class Drawing {
         return sprite;
     }
     public static inline function createFilledSprite(image:String, width:Float, height:Float=0):LifecycleSprite  {
-        var sprite = new LifecycleSprite();
+        var sprite = LifecycleSpritePooled.create();
         sprite.setName(image);
         fillBox(sprite.graphics, image, 0, 0, width, height);
         return sprite;
@@ -139,7 +142,11 @@ class Drawing {
             var argsStr:Array<String> = background.split(",");
 
             var angle:Float = 0;
-            var angleStr:String = StringTools.trim(argsStr.shift());
+            var firstArgument:String = StringTools.trim(argsStr.shift());
+            var firstArgs:Array<String> = firstArgument.split(" ");
+
+
+            var angleStr:String = StringTools.trim(firstArgs.shift());                        
             if(angleStr == "top") {
                 angle = Math.PI * .5;
             } else if(angleStr == "bottom") {
@@ -150,6 +157,24 @@ class Drawing {
                 angle = NumberUtils.degreesToRadians(Std.parseFloat(angleStr.substr(0, angleStr.length-3)));
             } else {
                 angle = Std.parseFloat(angleStr);
+            }
+
+            var matrixWidth:Float = width != 0 ? width : Application.SCREEN_WIDTH;
+            if(firstArgs.length > 0) {
+                var matrixWidthArg:String = firstArgs.shift();
+                var matrixWidthInt:Int = Std.parseInt(matrixWidthArg.substr(0, matrixWidthArg.length -2));
+                if(matrixWidthInt != 0) {
+                    matrixWidth = matrixWidthInt * Application.SCALE;
+                }
+            }
+
+            var matrixHeight:Float = height != 0 ? height : Application.SCREEN_HEIGHT;
+            if(firstArgs.length > 0) {
+                var matrixHeightArg:String = firstArgs.shift();
+                var matrixHeightInt:Int = Std.parseInt(matrixHeightArg.substr(0, matrixHeightArg.length -2));
+                if(matrixHeightInt != 0) {
+                    matrixHeight = matrixHeightInt * Application.SCALE;
+                }
             }
 
             var colors:Array<Int> = [];
@@ -163,7 +188,11 @@ class Drawing {
                 colorArg = StringTools.trim(colorArg);
                 var colorPercent:Array<String> = colorArg.split(" ");
                 var color:String = colorPercent[0];
-                if(color.length == 10) {
+
+                if(color == "transparent") {
+                    colors.push(0x000000);
+                    alphas.push(0);
+                } else if(color.length == 10) {
                     colors.push(Std.parseInt(color.substr(0, 8)));
                     alphas.push(Std.parseInt("0x" + color.substr(8, 10)) / 255.0);
                 } else {
@@ -172,8 +201,15 @@ class Drawing {
                 }
                 if(colorPercent.length > 1) {
                     var percentStr:String = colorPercent[1];
-                    percentStr = percentStr.substr(0, percentStr.length-1);
-                    ratios.push(Std.parseFloat(percentStr)/100.0 * 255);
+
+                    if(StringTools.endsWith(percentStr, "%")) {
+                        percentStr = percentStr.substr(0, percentStr.length-1);
+                        ratios.push(Std.parseFloat(percentStr)/100.0 * 255);
+                    } else { //px
+                        percentStr = percentStr.substr(0, percentStr.length-2);
+                        ratios.push(Std.parseFloat(percentStr)/matrixWidth * 255);
+                    }
+
                 } else {
                     ratios.push(count * ratioIncrement);
                 }
@@ -181,7 +217,7 @@ class Drawing {
             }
             if(matrix == null) {
                 matrix = new Matrix();
-                matrix.createGradientBox(width != 0 ? width : Application.SCREEN_WIDTH, height != 0 ? height : Application.SCREEN_HEIGHT, angle, x, y);
+                matrix.createGradientBox(matrixWidth, matrixHeight, angle, x, y);
             }
 
             if(fillLine) {
@@ -191,7 +227,7 @@ class Drawing {
                                            alphas,
                                            ratios,
                                            matrix,
-                                           SpreadMethod.PAD,
+                                           SpreadMethod.REPEAT,
                                            InterpolationMethod.RGB,
                                            0);
             } else {
@@ -200,7 +236,7 @@ class Drawing {
                                            alphas,
                                            ratios,
                                            matrix,
-                                           SpreadMethod.PAD,
+                                           SpreadMethod.REPEAT,
                                            InterpolationMethod.RGB,
                                            0);
             }
@@ -223,17 +259,30 @@ class Drawing {
             }
             return Application.SCREEN_SIZE;
         } else {
-            var backgroundImage:BitmapData = getBitmapData(background);
+            var imageScale:Array<String> = background.split(" ");
+
+            var backgroundImage:BitmapData = getBitmapData(StringTools.trim(imageScale[0]));
+            var scale:Float = 1;
             if(matrix == null) {
                 matrix = Application.SCALE_MATRIX;
+
+                if(imageScale.length > 1) {
+                    var scaleArg:String = StringTools.trim(imageScale[1].substr(0, imageScale[1].length - 1));
+                    scale = Std.parseInt(scaleArg)/100.0;
+                    matrix.scale(scale, scale);
+                }
             }
             if(fillLine) {
                 graphics.lineStyle(lineThickness, CapsStyle.ROUND, JointStyle.ROUND);
                 graphics.lineBitmapStyle(backgroundImage, matrix, true, true);
             } else {
-                graphics.beginBitmapFill(backgroundImage, matrix, true, true);
+                graphics.beginBitmapFill(backgroundImage, matrix, true, false);
             }
-            return new Size(backgroundImage.width*Application.SCALE, backgroundImage.height*Application.SCALE);
+
+            if(scale != 1) {
+                matrix.scale(1/scale, 1/scale);
+            }
+            return new Size(backgroundImage.width*scale*Application.SCALE, backgroundImage.height*scale*Application.SCALE);
         }
 	}
 
@@ -246,21 +295,21 @@ class Drawing {
 	public static inline function fillSprite(sprite:Sprite, background:String, paddingX:Float=0, paddingY:Float=0, radius:Float=0):Void {
         fillBox(sprite.graphics, background, 0, 0, sprite.width+paddingX, sprite.height+paddingY, radius);
     }
-    public static inline function fillBox(graphics:Graphics, background:String, x:Float=0, y:Float=0, width:Float=0, height:Float=0, radius:Float=0, down:Bool=false, up:Bool=false, fitXUnder:Bool=false, fitYUnder:Bool=false, fitXOver:Bool=false, fitYOver:Bool=false):Void {
+    public static inline function fillBox(graphics:Graphics, background:String, x:Float=0, y:Float=0, width:Float=0, height:Float=0, radius:Float=0, down:Bool=false, up:Bool=false, ?xFit:DrawFit, ?yFit:DrawFit):Void {
         var imageSize:Size = beginStyle(graphics, background, null, false, 0, width, height, x, y);
         if(width == 0) {
             width = imageSize.getWidth();
-        } else if(fitXUnder) {
+        } else if(Type.enumEq(xFit, DrawFit.UNDER)) {
             width = Math.floor(width/imageSize.getWidth()) * imageSize.getWidth();
-        } else if(fitXOver) {
+        } else if(Type.enumEq(xFit, DrawFit.OVER)) {
             width = Math.ceil(width/imageSize.getWidth()) * imageSize.getWidth();
         }
 
         if(height == 0) {
             height = imageSize.getHeight();
-        } else if(fitYUnder) {
+        } else if(Type.enumEq(yFit, DrawFit.UNDER)) {
             height = Math.floor(height/imageSize.getHeight()) * imageSize.getHeight();
-        } else if(fitYOver) {
+        } else if(Type.enumEq(yFit, DrawFit.OVER)) {
             height = Math.ceil(height/imageSize.getHeight()) * imageSize.getHeight();
         }
 
@@ -354,8 +403,8 @@ class Drawing {
         graphics.drawPath(commands, data);
         /*commands = commands.splice(0, commands.length);
         data = data.splice(0, data.length);*/
-        commands = new Vector<Int>();
-        data = new Vector<Float>();
+        commands.splice(0, commands.length);
+        data.splice(0, data.length);
     }
 
 
@@ -471,10 +520,14 @@ class Drawing {
             lineY -= vertex.y;
             lineTo(lineX, lineY);
 		}
-
         lineTo(lineX, y);
+        //lineTo(x, y);
         drawPath(graphics);
         endStyle(graphics);
+
+        /*Drawing.fillBox(graphics, "#ff0000", lineX, lineY, Application.SPACER, Application.SPACER);
+        Drawing.fillBox(graphics, "#00ff00", lineX, y, Application.SPACER, Application.SPACER);
+        Drawing.fillBox(graphics, "#0000ff", x, y, Application.SPACER, Application.SPACER);*/
 	}
 
     public static inline function drawPolygon(graphics:Graphics, vertices:Array<Point>, x:Float=0, y:Float=0, ?background:String):Void {
@@ -495,6 +548,48 @@ class Drawing {
             endStyle(graphics);
         }
     }
+
+    public static function fillPolygonTriangles(graphics:Graphics, x:Float, y:Float, vertices:Array<Point>, ?background:String) {
+        trace("---------------Line 551");
+        if(background != null) {
+            beginStyle(graphics, background);  //todo: add size info?
+        }
+
+        var iterator:Iterator<Point> = vertices.iterator();
+        var v0:Point = iterator.next();
+        var v1:Point = v0;
+
+        var verticies:Vector<Float> = new Vector<Float>();
+        while (iterator.hasNext()) {
+            var v2:Point = iterator.next();
+            //graphics.fillTriangle(v1.x + x, v1.y + y, v2.x + x, v2.y + y, x, y);
+            verticies.push(v1.x + x);
+            verticies.push(v1.y + y);
+
+            verticies.push(v2.x + x);
+            verticies.push(v2.y + y);
+
+            verticies.push(x);
+            verticies.push(y);
+
+            v1 = v2;
+        }
+        //graphics.fillTriangle(v1.x + x, v1.y + y, v0.x + x, v0.y + y, x, y);
+        verticies.push(v1.x + x);
+        verticies.push(v1.y + y);
+
+        verticies.push(v0.x + x);
+        verticies.push(v0.y + y);
+
+        verticies.push(x);
+        verticies.push(y);
+
+        graphics.drawTriangles(verticies);
+        if(background != null) {
+            endStyle(graphics);
+        }
+    }
+
 
     public static inline function fillExceptHole(graphics:Graphics, background:String, x:Float, y:Float, radius:Float):Void {
         var topBorder:Float = y-radius;
@@ -1004,4 +1099,10 @@ class Drawing {
 			//graphics.drawRect(-size / 4, 0, size/2, size / 2);
 			drawTriangle(graphics, 0, size, size);
 		}*/
+}
+
+enum DrawFit {
+    NONE;
+    UNDER;
+    OVER;
 }

@@ -4,7 +4,7 @@ package com.nachofries.framework.util;
  * ...
  * @author Michael Bernstein
  */
-
+@final
 class Delay implements Updateable {
     private static inline var DEFAULT_TIME:Int = 100;
     private var started:Bool = false;

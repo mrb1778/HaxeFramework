@@ -2,8 +2,6 @@ package com.nachofries.framework.spritesheet;
 import com.nachofries.framework.util.ClassInfo;
 import com.nachofries.framework.behavior.ParticleBehavior;
 import com.nachofries.framework.sprite.SpriteSheetSpriteCreator;
-import com.nachofries.framework.util.Set;
-import com.nachofries.framework.spritesheet.SpriteSheetSprite;
 import com.nachofries.framework.sprite.SpriteCreator;
 
 import com.nachofries.framework.util.Placement;
@@ -14,7 +12,8 @@ import com.nachofries.framework.util.Pooling;
  * @author Michael R. Bernstein
  */
 
-class ParticleSystemSpriteSheetSprite extends SpriteSheetSprite {
+@final
+class ParticleSystemSpriteSheetSprite extends AbstractSpriteSheetSprite {
     private var timeToLive:Int = -1;
 
     private var particleRate:Int;
@@ -22,7 +21,7 @@ class ParticleSystemSpriteSheetSprite extends SpriteSheetSprite {
     private var startParticles:Int;
     private var nextParticleTimer:Int;
     private var maxParticles:Int;
-    private var particles:Set<SpriteSheetSprite> = new Set<SpriteSheetSprite>();
+    private var particles:List<AbstractSpriteSheetSprite> = new List<AbstractSpriteSheetSprite>();
     private var removeListener:ParticleSystemSpriteSheetSprite->Void;
 
     private var particleProperties:Dynamic;
@@ -94,7 +93,7 @@ class ParticleSystemSpriteSheetSprite extends SpriteSheetSprite {
     }
 
     private function createParticle():Void {
-        var sprite:SpriteSheetSprite = SpriteSheetSpriteCreator.createFromJson(particleProperties);
+        var sprite:AbstractSpriteSheetSprite = SpriteSheetSpriteCreator.createFromJson(particleProperties);
         SpriteCreator.populateFromJson(sprite, particleProperties);
         Placement.alignCenters(this, sprite);
         var behavior:ParticleBehavior = ParticleBehavior.create(this, particleProperties);
@@ -104,7 +103,7 @@ class ParticleSystemSpriteSheetSprite extends SpriteSheetSprite {
         particles.add(sprite);
     }
 
-    public function removeParticle(particle:SpriteSheetSprite):Void {
+    public function removeParticle(particle:AbstractSpriteSheetSprite):Void {
         particles.remove(particle);
         particle.destroy();
     }

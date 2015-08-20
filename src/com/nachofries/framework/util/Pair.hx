@@ -20,6 +20,4 @@ class Pair<T> {
     public inline function getOther(item:T):T {
         return item == first ? second : first;
     }
-
-    public function toString():String return "Pair("+first+", "+second+")";
 }

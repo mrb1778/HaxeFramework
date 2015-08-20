@@ -37,8 +37,6 @@ class Application {
     public static var SCROLLING_DISTANCE:Float = 40;
     public static var SCALE_MATRIX:Matrix = new Matrix();
 
-
-
     public static inline var FRAME_RATE:Int = 40;
     public static inline var FRAME_RATE_INVERSE:Float = 1.0/FRAME_RATE;
 
@@ -46,9 +44,14 @@ class Application {
         SCREEN_WIDTH = Lib.current.stage.stageWidth;
         SCREEN_HEIGHT = Lib.current.stage.stageHeight;
 
-        #if ios
+        //#if ios
+        #if openfl_legacy
         SCREEN_WIDTH *= Lib.current.stage.dpiScale;
         SCREEN_HEIGHT *= Lib.current.stage.dpiScale;
+        #else
+        //trace("Variable: " + Capabilities.screenDPI + ":Capabilities.screenDPI");
+        /*SCREEN_WIDTH *= Capabilities.screenDPI;
+        SCREEN_HEIGHT *= Capabilities.screenDPI;*/
         #end
 
         #if portrait

@@ -4,17 +4,88 @@ class JsonUtils {
     public static inline function extend<T>(base:T, extended:T): T {
         var extended:T = Reflect.copy(extended);
 
-        var fields = Reflect.fields(base);
-        for (field in fields) {
-            var baseFieldValue:Dynamic = Reflect.field(base, field);
-            if (!Reflect.hasField(extended, field)) {
-                Reflect.setField(extended, field, baseFieldValue);
-            } else if(Type.typeof(baseFieldValue) == Type.ValueType.TObject) {
-                Reflect.setField(extended, field, extend(baseFieldValue, Reflect.field(extended, field)));
+        var fieldNames = Reflect.fields(base);
+        for (fieldName in fieldNames) {
+            var baseFieldValue:Dynamic = Reflect.field(base, fieldName);
+            if(Std.is(baseFieldValue, Array)) {
+                var baseFieldValueArray:Array<Dynamic> = baseFieldValue;
+
+                var extendedFieldValueArray:Array<Dynamic>;
+                if(Reflect.hasField(extended, fieldName)) {
+                    extendedFieldValueArray = Reflect.field(extended, fieldName);
+                } else {
+                    extendedFieldValueArray = Reflect.copy(baseFieldValueArray);
+                }
+
+                var minusFieldName:String = fieldName + "-";
+                if (Reflect.hasField(extended, minusFieldName)) {
+                    var minusFields:Array<Dynamic> = Reflect.field(extended, minusFieldName);
+                    for (minusField in minusFields) {
+                        extendedFieldValueArray.unshift(minusField);
+                    }
+                }
+                var plusFieldName:String = fieldName + "+";
+                if (Reflect.hasField(extended, plusFieldName)) {
+                    var plusFields:Array<Dynamic> = Reflect.field(extended, plusFieldName);
+                    for (plusField in plusFields) {
+                        extendedFieldValueArray.push(plusField);
+                    }
+                }
+
+                Reflect.setField(extended, fieldName, extendedFieldValueArray);
+            } else if (!Reflect.hasField(extended, fieldName)) {
+                Reflect.setField(extended, fieldName, baseFieldValue);
+            }  else if(Reflect.isObject(baseFieldValue)) {
+                Reflect.setField(extended, fieldName, extend(baseFieldValue, Reflect.field(extended, fieldName)));
             }
         }
         return extended;
     }
+
+    public static inline function replaceVariables(json:Dynamic, variables:Map<String, Dynamic>):Void {
+        var fieldNames = Reflect.fields(json);
+        for (fieldName in fieldNames) {
+            var fieldValue:Dynamic = Reflect.field(json, fieldName);
+            if(Std.is(fieldValue, String)) {
+                var fieldValueStr:String = cast(fieldValue, String);
+                if(fieldValueStr.charAt(0) == '$') {
+                    fieldValueStr = fieldValueStr.substring(1);
+                    if(variables.exists(fieldValueStr)) {
+                        Reflect.setField(json, fieldName, variables.get(fieldValueStr));
+                    }
+                }
+            } /*else if(Std.is(fieldValue, Array)) {
+                *//*var baseFieldValueArray:Array<Dynamic> = baseFieldValue;
+
+                var extendedFieldValueArray:Array<Dynamic>;
+                if(Reflect.hasField(extended, fieldName)) {
+                    extendedFieldValueArray = Reflect.field(extended, fieldName);
+                } else {
+                    extendedFieldValueArray = Reflect.copy(baseFieldValueArray);
+                }
+
+                var minusFieldName:String = fieldName + "-";
+                if (Reflect.hasField(extended, minusFieldName)) {
+                    var minusFields:Array<Dynamic> = Reflect.field(extended, minusFieldName);
+                    for (minusField in minusFields) {
+                        extendedFieldValueArray.unshift(minusField);
+                    }
+                }
+                var plusFieldName:String = fieldName + "+";
+                if (Reflect.hasField(extended, plusFieldName)) {
+                    var plusFields:Array<Dynamic> = Reflect.field(extended, plusFieldName);
+                    for (plusField in plusFields) {
+                        extendedFieldValueArray.push(plusField);
+                    }
+                }
+
+                Reflect.setField(extended, fieldName, extendedFieldValueArray);*//*
+            } else if(Reflect.isObject(fieldValue)) {
+                //Reflect.setField(extended, fieldName, extend(baseFieldValue, Reflect.field(extended, fieldName)));
+            } else */
+        }
+    }
+
 
     public static inline function createMapFrom<T>(json:Dynamic):Map<String, T> {
         var map:Map<String, T> = new Map<String, T>();

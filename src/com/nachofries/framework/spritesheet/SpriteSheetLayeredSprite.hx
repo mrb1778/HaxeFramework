@@ -4,18 +4,18 @@ import com.nachofries.framework.util.Placement;
 import com.nachofries.framework.util.Placement.Offset;
 import com.nachofries.framework.util.ClassInfo;
 import com.nachofries.framework.util.Pooling;
-import com.nachofries.framework.spritesheet.SpriteSheetSprite;
 
 /**
  * ...
  * @author Michael R. Bernstein
  */
 
-class SpriteSheetLayeredSprite extends SpriteSheetSprite {
-    private var primarySprite:SpriteSheetSprite;
+@final
+class SpriteSheetLayeredSprite extends AbstractSpriteSheetSprite {
+    private var primarySprite:AbstractSpriteSheetSprite;
     private var layers:Array<SpriteSheetSpriteOffset> = [];
 
-    public static inline function create(?layerSprites:Array<SpriteSheetSprite>):SpriteSheetLayeredSprite {
+    public static inline function create(?layerSprites:Array<AbstractSpriteSheetSprite>):SpriteSheetLayeredSprite {
         var sprite:SpriteSheetLayeredSprite = Pooling.get(ClassInfo.getClassName());
 
         if(sprite == null) {
@@ -39,20 +39,20 @@ class SpriteSheetLayeredSprite extends SpriteSheetSprite {
         return layers;
     }
 
-    public function setPrimarySprite(sprite:SpriteSheetSprite):Void {
+    public function setPrimarySprite(sprite:AbstractSpriteSheetSprite):Void {
         primarySprite = sprite;
     }
 
-    public inline function getPrimarySprite():SpriteSheetSprite {
+    public inline function getPrimarySprite():AbstractSpriteSheetSprite {
         return primarySprite;
     }
 
-    public function addLayeredSprite(sprite:SpriteSheetSprite, offsetX:Float=0, offsetY:Float=0):Void {
+    public function addLayeredSprite(sprite:AbstractSpriteSheetSprite, offsetX:Float=0, offsetY:Float=0):Void {
         sprite.setScale(primarySprite.getScale());
         layers.push({sprite: sprite, offsetX: offsetX, offsetY: offsetY});
     }
 
-    public function getLayeredSprite(index:Int):SpriteSheetSprite {
+    public function getLayeredSprite(index:Int):AbstractSpriteSheetSprite {
         return layers[index].sprite;
     }
 
@@ -376,5 +376,5 @@ class SpriteSheetLayeredSprite extends SpriteSheetSprite {
 
 typedef SpriteSheetSpriteOffset  = {
     > Offset,
-    var sprite:SpriteSheetSprite;
+    var sprite:AbstractSpriteSheetSprite;
 }

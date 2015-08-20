@@ -3,15 +3,17 @@ package com.nachofries.framework.behavior;
  * ...
  * @author Michael R. Bernstein
  */
+import com.nachofries.framework.util.NumberUtils;
+import com.nachofries.framework.spritesheet.AbstractSpriteSheetSprite;
 import com.nachofries.framework.util.Application;
 import com.nachofries.framework.util.Displayable;
 import com.nachofries.framework.util.ClassInfo;
-import com.nachofries.framework.spritesheet.SpriteSheetSprite;
 import com.nachofries.framework.spritesheet.ParticleSystemSpriteSheetSprite;
 import com.nachofries.framework.behavior.Behavior;
 
 import com.nachofries.framework.util.Pooling;
 
+@final
 class ParticleBehavior extends Behavior {
     private var particleSystem:ParticleSystemSpriteSheetSprite;
 
@@ -45,16 +47,16 @@ class ParticleBehavior extends Behavior {
     private inline function setProperties(properties:Dynamic):Void {
         this.properties = properties;
 
-        timeToLive = Std.int(calcRandomVariance(properties.timeToLive, properties.timeToLiveVariance));
-        growthRate = calcRandomVariance(properties.growthRate, properties.growthRateVariance);
-        alphaRate = calcRandomVariance(properties.alphaRate, properties.alphaRateVariance);
-        rotationRate = calcRandomVariance(properties.rotationRate, properties.rotationRateVariance);
-        velocityX = calcRandomVariance(properties.velocityX, properties.velocityX) * Application.SCALE;
-        velocityY = calcRandomVariance(properties.velocityY, properties.velocityYVariance) * Application.SCALE;
-        velocityX += calcRandomVariance(properties.velocityOffsetX, properties.velocityOffsetXVariance) * Application.SCALE;
-        velocityY += calcRandomVariance(properties.velocityOffsetY, properties.velocityOffsetYVariance) * Application.SCALE;
-        accelerationX = calcRandomVariance(properties.accelerationX, properties.accelerationXVariance) * Application.SCALE;
-        accelerationY = calcRandomVariance(properties.accelerationY, properties.accelerationYVariance) * Application.SCALE;
+        timeToLive = Std.int(NumberUtils.calcRandomVariance(properties.timeToLive, properties.timeToLiveVariance));
+        growthRate = NumberUtils.calcRandomVariance(properties.growthRate, properties.growthRateVariance);
+        alphaRate = NumberUtils.calcRandomVariance(properties.alphaRate, properties.alphaRateVariance);
+        rotationRate = NumberUtils.calcRandomVariance(properties.rotationRate, properties.rotationRateVariance);
+        velocityX = NumberUtils.calcRandomVariance(properties.velocityX, properties.velocityX) * Application.SCALE;
+        velocityY = NumberUtils.calcRandomVariance(properties.velocityY, properties.velocityYVariance) * Application.SCALE;
+        velocityX += NumberUtils.calcRandomVariance(properties.velocityOffsetX, properties.velocityOffsetXVariance) * Application.SCALE;
+        velocityY += NumberUtils.calcRandomVariance(properties.velocityOffsetY, properties.velocityOffsetYVariance) * Application.SCALE;
+        accelerationX = NumberUtils.calcRandomVariance(properties.accelerationX, properties.accelerationXVariance) * Application.SCALE;
+        accelerationY = NumberUtils.calcRandomVariance(properties.accelerationY, properties.accelerationYVariance) * Application.SCALE;
         gravity = properties.gravity * Application.SCALE;
 
         if(properties.symmetricalVelocityX == true && Math.random() > .5) {
@@ -65,27 +67,23 @@ class ParticleBehavior extends Behavior {
         }
     }
 
-    static inline function calcRandomVariance(value:Float, variance:Float):Float {
-        return value + (-.5 + Math.random()) * variance;
-    }
-
     override public function setTarget(target:Displayable):Void {
         super.setTarget(target);
         if(properties != null) {
             if(properties.sourcePositionVarianceX != null) {
-                target.setCenterX(calcRandomVariance(target.getCenterX(), properties.sourcePositionVarianceX * Application.SCALE));
+                target.setCenterX(NumberUtils.calcRandomVariance(target.getCenterX(), properties.sourcePositionVarianceX * Application.SCALE));
             }
             if(properties.sourcePositionVarianceY != null) {
-                target.setCenterY(calcRandomVariance(target.getCenterY(), properties.sourcePositionVarianceY * Application.SCALE));
+                target.setCenterY(NumberUtils.calcRandomVariance(target.getCenterY(), properties.sourcePositionVarianceY * Application.SCALE));
             }
             if(properties.startColorRed != null) {
-                target.setRed(calcRandomVariance(properties.startColorRed, properties.startColorRedVariance));
+                target.setRed(NumberUtils.calcRandomVariance(properties.startColorRed, properties.startColorRedVariance));
             }
             if(properties.startColorGreen != null) {
-                target.setGreen(calcRandomVariance(properties.startColorGreen, properties.startColorGreenVariance));
+                target.setGreen(NumberUtils.calcRandomVariance(properties.startColorGreen, properties.startColorGreenVariance));
             }
             if(properties.startColorBlue != null) {
-                target.setBlue(calcRandomVariance(properties.startColorBlue, properties.startColorBlueVariance));
+                target.setBlue(NumberUtils.calcRandomVariance(properties.startColorBlue, properties.startColorBlueVariance));
             }
         }
     }
@@ -95,7 +93,7 @@ class ParticleBehavior extends Behavior {
         super.update();
 
         if(--timeToLive == 0 || target.getAlpha() <= 0 || target.getScale() <= 0) {
-            particleSystem.removeParticle(cast(target, SpriteSheetSprite));
+            particleSystem.removeParticle(cast(target, AbstractSpriteSheetSprite));
         } else {
             target.setScale(target.getScale() + growthRate);
             target.setRotation(target.getRotation() + rotationRate);

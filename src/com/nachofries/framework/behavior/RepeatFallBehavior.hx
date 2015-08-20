@@ -10,6 +10,7 @@ import com.nachofries.framework.util.Application;
  * @author Michael R. Bernstein
  */
 
+@final
 class RepeatFallBehavior extends Behavior {
     public static inline var VERTICAL_SPEED_DEFAULT:Float = 5;
 

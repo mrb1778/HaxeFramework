@@ -191,8 +191,8 @@ class LifecycleSprite extends Sprite implements Displayable {
             }
         }
         for (child in foundChildren) {
-            if(Std.is(child, LifecycleSprite)) {
-                cast(child, LifecycleSprite).destroy();
+            if(Std.is(child, Displayable)) {
+                cast(child, Displayable).destroy();
             } else {
                 removeChild(child);
             }

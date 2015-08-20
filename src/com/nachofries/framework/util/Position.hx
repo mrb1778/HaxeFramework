@@ -10,6 +10,7 @@ enum Position {
     ABOVE_LEFT;
     ABOVE_WITH_LEFT;
     ABOVE_CENTER;
+    ABOVE_LEFT_CENTER;
     ABOVE_RIGHT;
     ABOVE_WITH_RIGHT;
     TOP_LEFT;
@@ -27,6 +28,7 @@ enum Position {
     BELOW;
     BELOW_LEFT;
     BELOW_WITH_LEFT;
+    BELOW_WITH_RIGHT;
     BELOW_CENTER;
     BELOW_RIGHT;
     BOTTOM;

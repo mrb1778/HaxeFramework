@@ -1,8 +1,8 @@
 package com.nachofries.framework.lifecycle;
-import com.nachofries.framework.util.Application;
+import openfl.display.Shape;
+import com.nachofries.framework.util.ClassInfo;
+import com.nachofries.framework.util.Pooling;
 import com.nachofries.framework.util.Drawing;
-import openfl.display.BitmapData;
-import openfl.display.Bitmap;
 import com.nachofries.framework.util.NumberUtils;
 import com.nachofries.framework.util.Displayable;
 import com.nachofries.framework.behavior.Behavior;
@@ -12,9 +12,10 @@ import com.nachofries.framework.behavior.Behavior;
  * @author Michael R. Bernstein
  */
 
-class LifecycleBitmap extends Bitmap implements Displayable {
+@final
+class LifecycleShape extends Shape implements Displayable {
     private var behavior:Behavior;
-	private var shouldReset:Bool;
+    private var shouldReset:Bool;
 
     private var red:Float;
     private var green:Float;
@@ -25,60 +26,77 @@ class LifecycleBitmap extends Bitmap implements Displayable {
 
     private var rotationSet:Float = 0;
 
-    public function new(?bitmapData:BitmapData) {
-        super(bitmapData, null, true);
+    public static inline function create():LifecycleShape {
+        var shape:LifecycleShape = Pooling.get(ClassInfo.getClassName());
+
+        if(shape == null) {
+            shape = new LifecycleShape();
+        }
+        return shape;
     }
 
-	public function start():Void {}
+    private function new() {
+        super();
+    }
+
+    public function start():Void {}
     public function stop():Void {}
-	public function update():Void {
+    public function update():Void {
         if(behavior != null) {
             behavior.update();
         }
     }
 
-    public function getLeftX():Float { return x; }
-    public function setLeftX(x:Float):Void { this.x = x; }
+    inline public function getLeftX():Float { return x; }
+    inline public function setLeftX(x:Float):Void { this.x = x; locationChanged(); }
 
-    public function getCenterX():Float { return x + width * .5; }
-    public function setCenterX(x:Float):Void { this.x = x - width * .5; }
+    public function getCenterX():Float { return x + getWidth() * .5; }
+    public function setCenterX(x:Float):Void { this.x = x - getWidth() * .5; locationChanged(); }
 
-    public function getRightX():Float { return x + width; }
-    public function setRightX(x:Float):Void { this.x = x - width; }
+    public function getRightX():Float { return x + getWidth(); }
+    public function setRightX(x:Float):Void { this.x = x - getWidth(); locationChanged(); }
 
     public function getTopY():Float { return y; }
-    public function setTopY(y:Float):Void { this.y = y; }
+    public function setTopY(y:Float):Void { this.y = y; locationChanged(); }
 
-    public function getCenterY():Float { return y + height * .5; }
+    public function getCenterY():Float { return y + getHeight() * .5; }
     public function setCenterY(y:Float):Void {
-        this.y = y - height * .5;
+        this.y = y - getHeight() * .5;
+        locationChanged();
     }
 
-    public function getBottomY():Float { return y + height; }
-    public function setBottomY(y:Float):Void { this.y = y - height; }
+    public function getBottomY():Float { return y + getHeight(); }
+    public function setBottomY(y:Float):Void { this.y = y - getHeight(); locationChanged(); }
 
-    public inline function getWidth():Float { return width; }
-    public inline function getHeight():Float { return height; }
+    private function locationChanged():Void {
+
+    }
+
+    public function getWidth():Float { return width; }
+    public function getHeight():Float { return height; }
 
 
-	public function setMode(?mode:String, persist:Bool = true):Void { }
+    public function hasMode(mode:String):Bool {return false; }
+    public function setMode(?mode:String, persist:Bool = true):Void { }
     public function getMode():String { return null; }
-	public function isPrimaryMode():Bool { return true;  }
-	public function hasMode(mode:String):Bool { return false;  }
+    public function isPrimaryMode():Bool { return true;  }
 
-	public function reset():Void {
+    public function reset():Void {
         if(behavior != null) {
             behavior.reset();
         }
     }
-	public function resetDisplay():Void {
-
-	}
-	public inline function resetLocation():Void {
-		x = 0;
-		y = 0;
-	}
+    public function resetDisplay():Void {
+        graphics.clear();
+    }
+    public inline function resetLocation():Void {
+        x = 0;
+        y = 0;
+    }
     public inline function setBehavior(behavior:Behavior):Void {
+        if(this.behavior != null) {
+            this.behavior.destroy();
+        }
         if(behavior != null) {
             behavior.setTarget(this);
         }
@@ -87,11 +105,23 @@ class LifecycleBitmap extends Bitmap implements Displayable {
     public function getBehavior():Behavior { return behavior; }
 
     public function destroy():Void {
-        bitmapData = null;
-        if(behavior != null) {
-            behavior.destroy();
-            behavior = null;
+        shouldReset = false;
+        red = 0;
+        green = 0;
+        blue = 0;
+        flipY = false;
+        flipX = false;
+        rotationSet = 0;
+
+        setBehavior(null);
+        if(parent != null) {
+            parent.removeChild(this);
         }
+
+        resetDisplay();
+        resetLocation();
+
+        Pooling.recycle(this);
     }
 
     public inline function getVisible():Bool {return visible; }
@@ -105,12 +135,16 @@ class LifecycleBitmap extends Bitmap implements Displayable {
 
     public inline function getScaleX():Float { return scaleX; }
     public inline function setScaleX(value:Float):Void {
-        this.scaleX = value * Application.SCALE;
+        var center:Float = getCenterX();
+        this.scaleX = value;
+        setCenterX(center);
     }
 
     public inline function getScaleY():Float { return scaleY; }
     public inline function setScaleY(value:Float):Void {
-        this.scaleY = value  * Application.SCALE;
+        var center:Float = getCenterY();
+        this.scaleY = value;
+        setCenterY(center);
     }
 
     public inline function setRed(value:Float):Void { this.red = value; }
@@ -130,10 +164,14 @@ class LifecycleBitmap extends Bitmap implements Displayable {
     public function getFlipX():Bool { return flipX; }
 
     public function setFlipY(?value:Bool):Void {
+        var originalFlip:Bool = flipY;
         if(value == null) {
             flipY = !flipY;
         } else {
             flipY = value;
+        }
+        if(originalFlip != flipY) {
+            setScaleY(getScaleY()*-1);
         }
     }
     public function getFlipY():Bool { return flipY; }
@@ -153,8 +191,4 @@ class LifecycleBitmap extends Bitmap implements Displayable {
 
     public function setName(name:String):Void { this.name = name; }
     public function getName():String { return name; }
-
-    public function loadBitmapData(name:String):Void {
-        bitmapData = Drawing.getBitmapData(name);
-    }
 }

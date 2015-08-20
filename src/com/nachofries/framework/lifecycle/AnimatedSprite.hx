@@ -7,28 +7,26 @@ import com.nachofries.framework.util.Application;
  */
 
 class AnimatedSprite extends LifecycleSprite {
-	static inline var DEFAULT_ANIMATION_RATE:Int = 15;
-	static inline var ANIMATION_NAME_PRIMARY:String = "primary";
+	private static inline var DEFAULT_ANIMATION_RATE:Int = 15;
+	private static inline var ANIMATION_NAME_PRIMARY:String = "primary";
 
-	var animations:Map<String, Array<String>>;
-	var animationRates:Map<String, Array<Int>>;
+	private var animations:Map<String, Array<String>>;
+	private var animationRates:Map<String, Array<Int>>;
 
-    var currentAnimationName:String;
-    var currentAnimation:Array<String>;
-	var currentAnimationRates:Array<Int>;
+    private var currentAnimationName:String;
+    private var currentAnimation:Array<String>;
+	private var currentAnimationRates:Array<Int>;
+	private var animationRate:Int;
 	
-	public var animationRate:Int;
-	
-	public var loopCurrentAnimation:Bool;
-	public var reverseAnimation:Bool;
-	public var removeAfterAnimate:Bool;
-	
-	var currentIndex:Int;
-	var currentFrameDuration:Int;
-	
-	var primaryMode:Bool;
+	private var loopCurrentAnimation:Bool;
+	private var reverseAnimation:Bool;
+	private var removeAfterAnimate:Bool;
+	private var onAnimationFinished:Dynamic->Bool;
 
-    var animationBitmap:LifecycleBitmap;
+	private var currentIndex:Int;
+	private var currentFrameDuration:Int;
+    private var primaryMode:Bool;
+    private var animationBitmap:LifecycleBitmap;
 
 	
 	public function new(?primaryAnimationName:String, ?primaryNumFrames:Int, ?primaryAnimationRates:Array<Int>, ?primaryFrameNumbers:Array<Int>, ?reverseAnimation:Bool) {
@@ -77,6 +75,9 @@ class AnimatedSprite extends LifecycleSprite {
 				if (removeAfterAnimate) {
 					destroy();
 				}
+				if(onAnimationFinished != null) {
+                    onAnimationFinished(this);
+                }
 				if (!primaryMode && !loopCurrentAnimation) {
 					setAnimation();
 				} else if (reverseAnimation) {
@@ -139,5 +140,9 @@ class AnimatedSprite extends LifecycleSprite {
 	override public function setMode(?mode:String, persist:Bool = true):Void { setAnimation(mode, persist); }
     override public function getMode():String { return currentAnimationName; }
 	override public function hasMode(mode:String):Bool { return animations.exists(mode); }
-	override public function isPrimaryMode():Bool { return primaryMode;  }	
+	override public function isPrimaryMode():Bool { return primaryMode;  }
+
+    public function setOnAnimationFinished(onAnimationFinished:Dynamic->Bool):Void {
+        this.onAnimationFinished = onAnimationFinished;
+    }
 }

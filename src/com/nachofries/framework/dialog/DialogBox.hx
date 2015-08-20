@@ -28,6 +28,7 @@ class DialogBox extends DialogContents {
             "radius" => 50,
             "screenPercentY" => .5,
             "quitButtton" => true,
+            "alignQuitToSprite" => false,
             "clickToRemove" => false,
             "quitEvent" => null,
             "quitEventOptions" => null,
@@ -97,7 +98,7 @@ class DialogBox extends DialogContents {
         }
         if(sprite != null) {
             Placement.centerHorizontal(sprite);
-            box.addChild(sprite);
+            box.addAndWatchSprite(sprite);
         }
 
         if(options.get("quitButtton")) {
@@ -107,14 +108,12 @@ class DialogBox extends DialogContents {
             } else {
                 quitButton.setHandler(onClose);
             }
-            quitButton.setRightX(dialogWidth > Application.SCREEN_WIDTH ? Application.SCREEN_WIDTH : dialogWidth);
 
-            if(sprite != null) {
+            if(sprite != null && options.get("alignQuitToSprite") == true) {
                 Placement.placePosition(sprite, quitButton, Position.TOP_MIDDLE_RIGHT_CENTER);
-                box.addChild(sprite);
             } else {
-                //quitButton.setTopY(0);
-                Placement.placePosition(box, quitButton, Position.TOP_RIGHT);
+                quitButton.setRightX(dialogWidth > Application.SCREEN_WIDTH ? Application.SCREEN_WIDTH : dialogWidth);
+                quitButton.setTopY(0);
             }
             box.addAndWatchSprite(quitButton);
         }

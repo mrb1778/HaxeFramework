@@ -6,22 +6,20 @@ package com.nachofries.framework.spritesheet;
  */
 
 import com.nachofries.framework.util.Rectangle;
-import com.nachofries.framework.util.Set;
 import com.nachofries.framework.util.Application;
 class SpriteSheetLayer {
     public var renderer:SpriteSheetRenderer;
 
-    public var sprites:List<SpriteSheetSprite>;
-    public var syncedLayers:Set<SpriteSheetLayer>;
+    public var sprites:List<AbstractSpriteSheetSprite>;
+    public var syncedLayers:Array<SpriteSheetLayer>;
     private var offsetX:Float = 0;
     private var offsetY:Float = 0;
 
     private var trimSprites:Bool = true;
 
-
     public function new(?renderer:SpriteSheetRenderer) {
         this.renderer = renderer;
-        sprites = new List<SpriteSheetSprite>();
+        sprites = new List<AbstractSpriteSheetSprite>();
     }
     public function setRenderer(renderer:SpriteSheetRenderer):Void {
         this.renderer = renderer;
@@ -49,11 +47,11 @@ class SpriteSheetLayer {
         offsetX = otherLayer.offsetX;
         offsetY = otherLayer.offsetY;
     }
-    public inline function addSprite(sprite:SpriteSheetSprite):Void {
+    public inline function addSprite(sprite:AbstractSpriteSheetSprite):Void {
         sprites.add(sprite);
         sprite.setLayer(this);
     }
-    public function removeSprite(sprite:SpriteSheetSprite):Void {
+    public function removeSprite(sprite:AbstractSpriteSheetSprite):Void {
         sprites.remove(sprite);
     }
     public function render():Void {
@@ -91,9 +89,9 @@ class SpriteSheetLayer {
 
     public function addSyncedLayer(spriteSheetLayer:SpriteSheetLayer):Void {
         if(syncedLayers == null) {
-            syncedLayers = new Set<SpriteSheetLayer>();
+            syncedLayers = new Array<SpriteSheetLayer>();
         }
-        syncedLayers.add(spriteSheetLayer);
+        syncedLayers.push(spriteSheetLayer);
     }
     private inline function syncLayers():Void {
         if(syncedLayers != null) {

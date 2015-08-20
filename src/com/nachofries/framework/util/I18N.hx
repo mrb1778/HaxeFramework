@@ -45,7 +45,7 @@ class I18N {
             language = "";
         }
 
-        var json = Resources.loadJson((directory == null ? "" : (directory + "/")) + fileName + language);
+        var json = Resources.loadJson((directory == null ? "" : (directory + "/")) + fileName + ((language == "" || language == null) ? "" : "-" + language));
         if(json != null) {
             JsonUtils.populateMapFrom(text, json.messages);
         } else if(language != "") {

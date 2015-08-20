@@ -8,7 +8,7 @@ import com.nachofries.framework.lifecycle.LifecycleSpriteWatcher;
 import com.nachofries.framework.util.Directions;
 import com.nachofries.framework.util.Direction;
 import openfl.geom.Point;
-import com.nachofries.framework.util.MouseDragHandler;
+import com.nachofries.framework.util.MouseHandler;
 import openfl.ui.Keyboard;
 import openfl.events.KeyboardEvent;
 import com.nachofries.framework.util.Placement;
@@ -29,7 +29,7 @@ class ScrollScreen extends LifecycleScreen {
 
 
     private var focusIndex:Int;
-    private var mouseDragHandler:MouseDragHandler;
+    private var mouseHandler:MouseHandler;
 
     private var backgroundSprite:LifecycleSprite;
 
@@ -41,8 +41,8 @@ class ScrollScreen extends LifecycleScreen {
 
         focusIndex = 0;
 
-        mouseDragHandler = new MouseDragHandler(this);
-        mouseDragHandler.setMouseMoveListener(onMouseMove);
+        mouseHandler = new MouseHandler(this)
+                            .setMouseDragListener(onMouseDrag);
 
         buttonContainer = new LifecycleSpriteWatcher();
         addAndWatchSprite(buttonContainer);
@@ -53,12 +53,12 @@ class ScrollScreen extends LifecycleScreen {
 
     override function start():Void {
         super.start();
-        mouseDragHandler.start();
+        mouseHandler.start();
         Lib.current.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
     }
     override function stop():Void {
         super.stop();
-        mouseDragHandler.stop();
+        mouseHandler.stop();
         Lib.current.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
     }
 
@@ -132,7 +132,7 @@ class ScrollScreen extends LifecycleScreen {
         }
     }
 
-    private function onMouseMove(startPoint:Point, endPoint:Point):Void {
+    private function onMouseDrag(startPoint:Point, endPoint:Point):Void {
         var direction:Direction = Directions.getHorizontalDirectionFromPoints(startPoint, endPoint);
         Type.enumEq(direction, Direction.LEFT) ? moveRight() : moveLeft();
     }

@@ -60,6 +60,10 @@ class GameSettings {
         }
         return false;
     }
+    public static inline function getItem(setting:String, amount:Int):Bool {
+        SavedSettings.incrementSetting(setting, amount);
+        return true;
+    }
     public static inline function isCoinAmount(string:String):Bool {
         return StringTools.startsWith(string, COINS_PREFIX);
     }

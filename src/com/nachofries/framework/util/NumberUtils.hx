@@ -99,4 +99,8 @@ class NumberUtils {
         }
         return uid.toString();
     }
+
+    public static inline function calcRandomVariance(value:Float, variance:Float):Float {
+        return value + (-.5 + Math.random()) * variance;
+    }
 }

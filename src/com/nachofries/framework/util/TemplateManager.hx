@@ -9,10 +9,12 @@ package com.nachofries.framework.util;
 class TemplateManager {
     private static var defaults:Dynamic;
     private static var templates:Map<String, Dynamic> = new Map<String, Dynamic>();
+    private static var templateVariables:Map<String, Dynamic> = new Map<String, Dynamic>();
 
     public static inline function initialize():Void {
         loadDefaults();
         loadTemplates();
+        JsonUtils.populateMapFrom(templateVariables, Settings.getSetting("template.variables", []));
     }
 
     public static function setDefaults(defaults:Dynamic):Void {
@@ -84,6 +86,8 @@ class TemplateManager {
             json = extendFromTemplates(json, subTemplateName);
             json.extendedSub = subTemplateName;
         }
+        JsonUtils.replaceVariables(json, templateVariables);
+
         return json;
     }
 
@@ -100,5 +104,9 @@ class TemplateManager {
 
     public static function hasTemplate(templateName:String):Bool {
         return templates.exists(templateName);
+    }
+
+    public function setTemplateVariable(key:String, value:Dynamic):Void {
+        templateVariables.set(key, value);
     }
 }

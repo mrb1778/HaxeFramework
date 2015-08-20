@@ -3,66 +3,76 @@ package com.nachofries.framework.spritesheet;
 import com.nachofries.framework.util.Application;
 import com.nachofries.framework.util.ClassInfo;
 import com.nachofries.framework.util.Pooling;
-import com.nachofries.framework.spritesheet.SpriteSheetSprite;
 
 /**
  * ...
  * @author Michael R. Bernstein
  */
 
-class TiledSpriteSheetSprite extends SpriteSheetSprite {
+@final
+class TiledSpriteSheetSprite extends AbstractSpriteSheetSprite {
     private var tileWidth:Float;
     private var tileHeight:Float;
 
     private var columns:Int;
     private var rows:Int;
 
-    public static inline function create(image:String, columns:Int, rows:Int):TiledSpriteSheetSprite {
+    public static inline function create(image:String, columns:Int=1, rows:Int=1):TiledSpriteSheetSprite {
         var sprite:TiledSpriteSheetSprite = Pooling.get(ClassInfo.getClassName());
         if(sprite == null) {
             sprite = new TiledSpriteSheetSprite();
         }
 
-        sprite.columns = columns;
-        sprite.rows = rows;
         sprite.init(image);
+        sprite.setColumns(columns);
+        sprite.setRows(columns);        
 
         return sprite;
     }
     override public function init(?image:String):Void {
         super.init(image);
+        rows = 1;
+        columns = 1;
+        tileWidth = width;
+        tileHeight = height;
+    }
 
-        if(rows == 0) {
-            rows = 1;
-        }
+    public function setColumns(columns:Int=1):Void {        
         if(columns == 0) {
             columns = 1;
         }
+        this.columns = columns;
+        width = tileWidth * columns;
+    }
+    
+    public function setRows(rows:Int=1):Void {
+        if(rows == 0) {
+            rows = 1;
+        }
+        this.rows = rows;
+        height = tileHeight * rows;
+    }
 
-        tileWidth = getWidth();
-        tileHeight = getHeight();
+    public function setWidth(width:Float):Void {
+        setColumns(Math.floor((width/Application.SCALE)/tileWidth));
+    }
 
-        width *= columns;
-        height *= rows;
-
-        /*x -= tileWidth * .5;
-        y -= tileHeight * .5;*/
-
-        /*Placement.alignTop(this);
-        Placement.alignLeft(this);*/
+    public function setHeight(height:Float):Void {
+        setRows(Math.floor((height/Application.SCALE)/tileHeight));
     }
 
     override public function render():Void {
+        var startX:Float = getLeftX();
+        var startY:Float = getTopY();
         for(i in 0...columns) {
             for(j in 0...rows) {
                 spriteSheetLayer.renderSprite(
-                    x + (i-.5) * tileWidth * scaleX * Application.SCALE,
-                    y + j * tileHeight * scaleY * Application.SCALE,
+                    startX + (i + .5) * tileWidth *  Application.SCALE,
+                    startY + (j + .5) * tileHeight *  Application.SCALE,
                     tileWidth, tileHeight,
                     spriteSheetIndex,
                     scaleX * Application.SCALE, scaleY * Application.SCALE,
-                    rotation,
-                    alpha,
+                    rotation, alpha,
                     red, green, blue,
                     flipX, flipY);
             }

@@ -4,14 +4,14 @@ import com.nachofries.framework.util.Application;
 import com.nachofries.framework.util.SavedSettings;
 import com.nachofries.framework.util.ClassInfo;
 import com.nachofries.framework.util.Pooling;
-import com.nachofries.framework.spritesheet.SpriteSheetSprite;
 
 /**
  * ...
  * @author Michael R. Bernstein
  */
 
-class TextSpriteSheetSprite extends SpriteSheetSprite {
+@final
+class TextSpriteSheetSprite extends AbstractSpriteSheetSprite {
     private var text:String;
     private var style:String;
     private var spriteSheetIndexes:Array<Int>;

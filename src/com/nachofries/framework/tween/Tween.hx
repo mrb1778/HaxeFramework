@@ -7,6 +7,8 @@ package com.nachofries.framework.tween;
 
 import com.nachofries.framework.util.ClassInfo;
 import com.nachofries.framework.util.Pooling;
+
+@final
 class Tween {
     public var easing:Easing;
     public var duration:Int;

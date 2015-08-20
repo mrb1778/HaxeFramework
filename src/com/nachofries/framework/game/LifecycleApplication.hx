@@ -4,6 +4,7 @@
  */
 package com.nachofries.framework.game;
 
+import com.nachofries.framework.util.Pooling;
 import com.nachofries.framework.util.Sounds;
 import com.nachofries.framework.util.SavedSettings;
 import com.nachofries.framework.util.Settings;
@@ -51,6 +52,7 @@ class LifecycleApplication extends Sprite implements LifeCycleController {
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;*/
         Lib.current.stage.quality = StageQuality.BEST;
         Application.initSizes();
+        Pooling.initialize();
         SpriteSheetManager.loadSpriteSheet();
         LifeCycleManager.initialize(this);
         Sounds.initialize();

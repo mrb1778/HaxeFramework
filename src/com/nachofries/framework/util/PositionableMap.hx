@@ -18,17 +18,19 @@ class PositionableMap extends StringMap<Positionable> {
         if(definition != null) {
             var name:String = definition.name;
             if (name != null) {
-                if(index == 0 || !exists(name)) {
+                if(index == null || index == 0) {
                     set(name, object);
+                } else {
+                    set(name + index, object);
                 }
-                set(name + index, object);
             }
             var templateName:String = definition.template;
             if (templateName != null) {
-                if(index == 0 || !exists(templateName)) {
+                if(index == null || index == 0) {
                     set(templateName, object);
+                } else {
+                    set(templateName + index, object);
                 }
-                set(templateName + index, object);
             }
         }
         set(IDENTIFIER_PREVIOUS, object);

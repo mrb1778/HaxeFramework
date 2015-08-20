@@ -24,8 +24,11 @@ class LifecycleScreen extends LifecycleSpriteWatcher implements DialogHandler {
         super();
         this.name = name;
 
-        Drawing.fillScreen(this, Settings.getSetting(name + ".background", "0x000000"));
-        var backgrounds:Array<String> = Settings.getSetting(name + ".backgrounds", []);
+        var backgroundSetting:String = name + ".background";
+        if(Settings.hasSetting(backgroundSetting)) {
+            Drawing.fillScreen(this, Settings.getSetting(backgroundSetting));
+        }
+        var backgrounds:Array<String> = Settings.getSetting(backgroundSetting + "s", []);
         for (background in backgrounds) {
             Drawing.fillScreen(this, background);
         }

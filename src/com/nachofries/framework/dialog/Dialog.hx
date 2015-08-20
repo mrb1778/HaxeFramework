@@ -13,6 +13,7 @@ import com.nachofries.framework.lifecycle.LifecycleSpriteWatcher;
 class Dialog extends LifecycleSpriteWatcher {
 	public static inline var EVENT_CLOSE:String = "dialog.close";
 
+	public static inline var DIALOG_SPLASH:String = "splash";
 	public static inline var DIALOG_PAUSE:String = "pause";
 	public static inline var DIALOG_WIN:String = "win";
 	public static inline var DIALOG_FAIL:String = "fail";
@@ -77,8 +78,6 @@ class Dialog extends LifecycleSpriteWatcher {
         this.handler = params.handler;
         if(params.autoRemove == true || params.autoRemoveDelay != null) {
             setAutoRemoveTime(params.autoRemoveDelay != null ? params.autoRemoveDelay : DEFAULT_AUTO_REMOVE);
-        } else {
-            autoRemoveDelay = null;
         }
 
         if(dialogContents != null) {
@@ -86,7 +85,7 @@ class Dialog extends LifecycleSpriteWatcher {
         }
     }
 
-	function onClose(?_):Bool {
+	public function onClose(?_):Bool {
 		close();
         return true;
 	}
